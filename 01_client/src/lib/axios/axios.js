@@ -1,12 +1,12 @@
 import axios from "axios";
 
-// Ollama API 기본 설정
-const OLLAMA_BASE_URL =
-  process.env.REACT_APP_OLLAMA_URL || "http://localhost:11434";
+// 서버 API 기본 설정
+const SERVER_BASE_URL =
+  process.env.REACT_APP_SERVER_URL || "http://localhost:4000";
 
 // Axios 인스턴스 생성
-const ollamaApi = axios.create({
-  baseURL: OLLAMA_BASE_URL,
+const serverApi = axios.create({
+  baseURL: SERVER_BASE_URL,
   timeout: 30000, // 30초 타임아웃
   headers: {
     "Content-Type": "application/json",
@@ -14,26 +14,26 @@ const ollamaApi = axios.create({
 });
 
 // 요청 인터셉터 (로깅용)
-ollamaApi.interceptors.request.use(
+serverApi.interceptors.request.use(
   (config) => {
-    console.log("Ollama API 요청:", config.method?.toUpperCase(), config.url);
+    console.log("Server API 요청:", config.method?.toUpperCase(), config.url);
     return config;
   },
   (error) => {
-    console.error("Ollama API 요청 오류:", error);
+    console.error("Server API 요청 오류:", error);
     return Promise.reject(error);
   }
 );
 
 // 응답 인터셉터 (에러 처리)
-ollamaApi.interceptors.response.use(
+serverApi.interceptors.response.use(
   (response) => {
-    console.log("Ollama API 응답:", response.status, response.config.url);
+    console.log("Server API 응답:", response.status, response.config.url);
     return response;
   },
   (error) => {
     console.error(
-      "Ollama API 응답 오류:",
+      "Server API 응답 오류:",
       error.response?.status,
       error.message
     );
@@ -41,12 +41,12 @@ ollamaApi.interceptors.response.use(
   }
 );
 
-// Ollama API 함수들
-export const ollamaApiService = {
+// Server API 함수들
+export const serverApiService = {
   // 모델 목록 조회
   async listModels() {
     try {
-      const response = await ollamaApi.get("/api/tags");
+      const response = await serverApi.get("/api/models");
       return response.data;
     } catch (error) {
       throw new Error(`모델 목록 조회 실패: ${error.message}`);
@@ -82,7 +82,7 @@ export const ollamaApiService = {
         fetchOptions.signal = abortController.signal;
       }
 
-      const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, fetchOptions);
+      const response = await fetch(`${SERVER_BASE_URL}/api/chat`, fetchOptions);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -91,9 +91,6 @@ export const ollamaApiService = {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
-      // 스트림 응답을 처리하기 위한 reader와 decoder 설정
-      // reader: 응답 본문을 청크 단위로 읽기 위한 ReadableStreamDefaultReader 객체
-      // decoder: 바이너리 데이터를 텍스트로 변환하기 위한 TextDecoder 객체
       while (true) {
         // AbortController가 abort된 경우 확인
         if (abortController && abortController.signal.aborted) {
@@ -137,7 +134,7 @@ export const ollamaApiService = {
 };
 
 // API 관련 유틸리티 함수들
-export const ollamaUtils = {
+export const serverUtils = {
   // 기본 채팅 옵션
   getDefaultChatOptions() {
     return {
@@ -166,7 +163,7 @@ export const ollamaUtils = {
       }
     } else if (error.request) {
       // 요청은 보냈지만 응답이 없는 경우
-      return "Ollama 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.";
+      return "서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.";
     } else {
       // 요청 설정 중 오류
       return `요청 오류: ${error.message}`;
@@ -174,4 +171,4 @@ export const ollamaUtils = {
   },
 };
 
-export default ollamaApiService;
+export default serverApiService;

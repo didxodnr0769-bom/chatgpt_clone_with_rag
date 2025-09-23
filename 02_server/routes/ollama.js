@@ -30,20 +30,46 @@ router.get("/models", async (req, res) => {
  */
 router.post("/chat", async (req, res) => {
   try {
-    const { model, messages } = req.body;
+    const { model, messages, stream = false } = req.body;
 
     const finalMessages = [
       { role: "system", content: SYSTEM_PROMPT },
       ...messages,
     ];
 
-    const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
-      model: model,
-      messages: finalMessages,
-      stream: false,
-    });
+    if (stream) {
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Transfer-Encoding', 'chunked');
 
-    res.json(response.data);
+      const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
+        model: model,
+        messages: finalMessages,
+        stream: true,
+      }, {
+        responseType: 'stream'
+      });
+
+      response.data.on('data', (chunk) => {
+        res.write(chunk);
+      });
+
+      response.data.on('end', () => {
+        res.end();
+      });
+
+      response.data.on('error', (error) => {
+        console.error('Stream error:', error);
+        res.status(500).end();
+      });
+    } else {
+      const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
+        model: model,
+        messages: finalMessages,
+        stream: false,
+      });
+
+      res.json(response.data);
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to chat with model" });

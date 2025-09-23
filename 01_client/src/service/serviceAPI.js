@@ -1,5 +1,5 @@
 // 화면단에서 사용할 서비스 API 모음
-import { ollamaApiService, ollamaUtils } from "@/lib/axios/axios";
+import { serverApiService, serverUtils } from "@/lib/axios/axios";
 
 // 채팅 관련 서비스
 export const chatService = {
@@ -54,7 +54,7 @@ export const chatService = {
 
   // 에러 메시지 생성
   createErrorMessage(error) {
-    return this.createMessage(ollamaUtils.handleError(error), "ai");
+    return this.createMessage(serverUtils.handleError(error), "ai");
   },
 
   // 스트림 채팅 완료 요청
@@ -77,10 +77,10 @@ export const chatService = {
       });
 
       // 스트림 API 호출
-      await ollamaApiService.chatCompletionStream(
+      await serverApiService.chatCompletionStream(
         apiMessages,
         model,
-        ollamaUtils.getDefaultChatOptions(),
+        serverUtils.getDefaultChatOptions(),
         onChunk,
         abortController
       );
@@ -103,7 +103,7 @@ export const modelService = {
   // 사용 가능한 모델 목록 조회
   async getAvailableModels() {
     try {
-      const response = await ollamaApiService.listModels();
+      const response = await serverApiService.listModels();
       return {
         success: true,
         models: response.models || [],
@@ -112,7 +112,7 @@ export const modelService = {
       console.error("모델 목록 조회 오류:", error);
       return {
         success: false,
-        error: ollamaUtils.handleError(error),
+        error: serverUtils.handleError(error),
       };
     }
   },
