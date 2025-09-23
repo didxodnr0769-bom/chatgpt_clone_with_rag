@@ -117,11 +117,12 @@ class DocumentService {
     return tokens;
   }
 
-  chunkMarkdownContent(content, maxChunkSize = 1000) {
+  chunkMarkdownContent(content, maxChunkSize = 1000, overlapSize = 100) {
     const tokens = this.parseMarkdown(content);
     const chunks = [];
     let currentChunk = '';
     let currentHeading = '';
+    let previousChunkEnd = '';
 
     for (const token of tokens) {
       if (token.type === 'heading') {
@@ -131,6 +132,7 @@ class DocumentService {
             heading: currentHeading,
             type: 'content'
           });
+          previousChunkEnd = this.getOverlapText(currentChunk.trim(), overlapSize);
           currentChunk = '';
         }
         currentHeading = token.text;
@@ -144,7 +146,8 @@ class DocumentService {
             heading: currentHeading,
             type: 'content'
           });
-          currentChunk = tokenText + '\n\n';
+          previousChunkEnd = this.getOverlapText(currentChunk.trim(), overlapSize);
+          currentChunk = previousChunkEnd + tokenText + '\n\n';
         } else {
           currentChunk += tokenText + '\n\n';
         }
@@ -160,6 +163,26 @@ class DocumentService {
     }
 
     return chunks;
+  }
+
+  getOverlapText(text, overlapSize) {
+    if (text.length <= overlapSize) {
+      return text + '\n\n';
+    }
+
+    const lastPart = text.slice(-overlapSize);
+    const lastSentenceEnd = Math.max(
+      lastPart.lastIndexOf('.'),
+      lastPart.lastIndexOf('!'),
+      lastPart.lastIndexOf('?'),
+      lastPart.lastIndexOf('\n')
+    );
+
+    if (lastSentenceEnd > 0) {
+      return text.slice(-(overlapSize - lastSentenceEnd)) + '\n\n';
+    }
+
+    return lastPart + '\n\n';
   }
 
   tokenToText(token) {

@@ -37,7 +37,7 @@ router.get("/models", async (req, res) => {
  */
 router.post("/chat", async (req, res) => {
   try {
-    const { model = "qwen-ko-Q2:latest", messages, stream = false } = req.body;
+    const { model = "qwen-ko-Q2:latest", messages } = req.body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "Messages array is required" });
