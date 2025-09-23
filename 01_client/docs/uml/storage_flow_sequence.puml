@@ -1,0 +1,43 @@
+@startuml Storage Flow Sequence
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+
+actor User as U
+participant "Web UI" as UI
+participant "Storage Service" as SS
+participant "Encryption Layer" as EL
+participant "LocalStorage" as LS
+
+== 앱 구동시 채팅 목록 조회 ==
+U -> UI : 앱 구동
+UI -> SS: 채팅 히스토리 요청
+SS -> LS: 암호화된 데이터 조회
+LS -> SS: 암호화된 데이터 반환
+SS -> EL: 데이터 복호화 요청
+EL -> EL: Base64 디코딩 + JSON 파싱
+EL -> SS: 복호화된 채팅 데이터 반환
+SS -> UI: 채팅 목록 전달
+UI -> UI: 채팅 목록 렌더링
+UI -> U: 채팅 목록 확인
+== 새 채팅 시작 ==
+U -> UI: 새 채팅 버튼 클릭
+UI -> UI: 새 채팅 상태로 초기화
+
+== 채팅 데이터 저장 ==
+UI -> UI: 채팅 완료 시
+UI -> SS: 채팅 데이터 저장 요청
+SS -> EL: 데이터 암호화 요청
+EL -> EL: JSON 직렬화 + Base64 인코딩
+EL -> SS: 암호화된 데이터 반환
+SS -> LS: 암호화된 데이터 저장
+SS -> UI: 저장 완료 알림
+UI -> UI: 채팅 목록 새로고침
+
+== 기존 채팅 선택 ==
+U -> UI: 채팅 목록에서 선택
+UI -> UI: 선택된 채팅 데이터 로드
+UI -> UI: 채팅 내용 렌더링
+
+@enduml

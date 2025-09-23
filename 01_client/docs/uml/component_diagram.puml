@@ -1,0 +1,45 @@
+@startuml Component Diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam roundcorner 20
+
+package "Web UI" {
+  [React Components] as UI
+}
+
+package "Service Layer" {
+  [serviceAPI] as SA
+  [serviceStorage] as SS
+}
+
+package "Library Layer" {
+  [axios] as A
+  [LocalStorage] as LS
+  [CryptoUtils] as CU
+}
+
+package "External" {
+  [Ollama LLM] as LLM
+}
+
+' Web UI 관계
+UI --> SA : uses
+UI --> SS : uses
+
+' Service Layer 관계
+SA --> A : uses
+SS --> LS : uses
+
+' Library Layer 관계
+LS --> CU : uses
+
+' External API 관계
+A --> LLM : HTTP requests
+
+' 주요 데이터 플로우
+note right of UI : 앱 시작시 채팅 히스토리 로드
+note right of UI : 실시간 스트리밍 처리
+note right of SS : LocalStorage 암호화 저장
+
+@enduml
