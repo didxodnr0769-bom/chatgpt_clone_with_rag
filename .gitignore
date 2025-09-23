@@ -87,3 +87,6 @@ pids/
 # Temporary files
 *.tmp
 *.temp
+
+# ai 
+CLAUDE.md
