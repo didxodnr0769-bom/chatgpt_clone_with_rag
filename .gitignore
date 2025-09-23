@@ -90,3 +90,6 @@ pids/
 
 # ai 
 CLAUDE.md
+# rag docs 
+02_server/docs/*
+02_server/data/*
