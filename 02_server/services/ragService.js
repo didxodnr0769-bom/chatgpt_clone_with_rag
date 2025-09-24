@@ -106,7 +106,7 @@ class RAGService {
           filename: doc.filename,
           heading: doc.heading,
           similarity: doc.similarity,
-          content: doc.content.substring(0, 200) + "...",
+          content: doc.content,
         })),
       };
     } catch (error) {
