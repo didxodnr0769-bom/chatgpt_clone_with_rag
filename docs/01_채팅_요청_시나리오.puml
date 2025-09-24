@@ -1,0 +1,30 @@
+@startuml ChatRequestFlow
+
+title 채팅 요청 흐름 (RAG 기반)
+
+actor "사용자" as User
+participant "React 클라이언트" as Client
+participant "Express 서버" as Server
+participant "RAGService" as RAG
+participant "Ollama API" as Ollama
+
+== 채팅 요청 ==
+User -> Client: 메시지 입력
+Client -> Server: POST /api/chat
+
+== RAG 처리 ==
+Server -> RAG: 사용자 질문으로 관련 문서 검색
+note right of RAG: 벡터 스토어에서\n유사도 기반 문서 검색
+
+RAG -> RAG: 검색된 문서로 컨텍스트 생성
+RAG -> Server: 컨텍스트가 포함된 프롬프트 반환
+
+== AI 응답 생성 ==
+Server -> Ollama: 컨텍스트와 함께 스트리밍 요청
+Ollama -> Server: 실시간 응답 생성
+
+== 응답 전달 ==
+Server -> Client: 스트리밍으로 응답 전송
+Client -> User: 실시간 응답 표시
+
+@enduml
